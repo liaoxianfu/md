@@ -24,15 +24,15 @@ Client 负责文件的切分，在上传的时候按照block的大小分解成�
 
 HDFS在1.x的时候默认的block大小是64MB 2.x的时候默认是128.
 
-![image-20200115131828090](img\image-20200115131828090.png)
+![image-20200115131828090](/home/liao/Documents/md/BigData/img\image-20200115131828090.png)
 
 ### 常见的命令行操作
 
 
 
-![image-20200115132154602](img\image-20200115132154602.png)
+![image-20200115132154602](/home/liao/Documents/md/BigData/img\image-20200115132154602.png)
 
-![image-20200115132237814](img\image-20200115132237814.png)
+![image-20200115132237814](/home/liao/Documents/md/BigData/img\image-20200115132237814.png)
 
 
 

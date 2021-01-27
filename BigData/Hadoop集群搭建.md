@@ -18,7 +18,7 @@ hostnamectl set-hostname hadoop203 # 192.168.77.203机器
 
 修改完毕后重启机器
 
-![image-20200901182533461](D:\MarkDown\BigData\img\image-20200901182533461.png)
+![image-20200901182533461](/home/liao/Documents/md/BigData/img\image-20200901182533461.png)
 
 查看到主机名更改成功即可
 
@@ -42,7 +42,7 @@ sudo vim /etc/hosts
 
 重启之后在所有机器上执行如下命令 机器之间能够ping通即可。
 
-![image-20200901183153640](C:\Users\liao\AppData\Roaming\Typora\typora-user-images\image-20200901183153640.png)
+
 
 #### 集群免密登陆
 
@@ -146,7 +146,7 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 有类似输出即可
 
-![image-20200901190028023](D:\MarkDown\BigData\img\image-20200901190028023.png)
+![image-20200901190028023](/home/liao/Documents/md/BigData/img\image-20200901190028023.png)
 
 分发
 
@@ -333,13 +333,13 @@ start-dfs.sh
 
 在浏览器上访问hadoop201:9870
 
-![image-20200901203239161](D:\MarkDown\BigData\img\image-20200901203239161.png)
+![image-20200901203239161](/home/liao/Documents/md/BigData/img\image-20200901203239161.png)
 
 
 
 ==如果不成功 请查看防火墙是否关闭==
 
-![image-20200901203322684](D:\MarkDown\BigData\img\image-20200901203322684.png)
+![image-20200901203322684](/home/liao/Documents/md/BigData/img\image-20200901203322684.png)
 
 上图就是没有关闭防火墙，在所有机器上都要关闭防火墙
 
@@ -354,7 +354,7 @@ sudo systemctl disable firewalld.service #禁止firewall开机启动
 
 在浏览器上访问 http://hadoop202:8042/
 
-![image-20200901204024558](D:\MarkDown\BigData\img\image-20200901204024558.png)
+![image-20200901204024558](/home/liao/Documents/md/BigData/img\image-20200901204024558.png)
 
 #### 集群时间同步设置
 

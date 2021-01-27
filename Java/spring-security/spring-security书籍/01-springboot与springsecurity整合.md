@@ -100,7 +100,7 @@ server:
 
 打开浏览器访问可以看到
 
-![image-20200924115313296](D:\MarkDown\Java\spring-security\spring-security书籍\img\image-20200924115313296.png)
+![image-20200924115313296](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200924115313296.png)
 
 
 
@@ -108,7 +108,7 @@ server:
 
 密码为在控制台打印的一串uuid
 
-![image-20200924153118637](D:\MarkDown\Java\spring-security\spring-security书籍\img\image-20200924153118637.png)
+![image-20200924153118637](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200924153118637.png)
 
 
 

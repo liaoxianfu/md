@@ -2,7 +2,7 @@
 
 
 
-![img](D:\MarkDown\Java\spring-security\img\liucheng.jpg)
+![img](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/liucheng.jpg)
 
 登录认证流程
 

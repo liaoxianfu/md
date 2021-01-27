@@ -39,4 +39,4 @@ export JAVA_HOME=/opt/module/jdk1.8.0_144
 
 Flume组成
 
-![image-20200823093638594](D:\MarkDown\BigData\img\image-20200823093638594.png)
+![image-20200823093638594](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200823093638594.png)

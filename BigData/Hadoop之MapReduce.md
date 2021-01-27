@@ -42,7 +42,7 @@ MapReduce无法像Mysql一样在毫秒或者秒级返回结果
 
 ### 核心思想
 
-![image-20200116180021431](img\image-20200116180021431.png)
+![image-20200116180021431](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200116180021431.png)
 
 1）分布式的运算程序往往需要分成至少2个阶段。
 
