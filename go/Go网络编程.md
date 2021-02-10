@@ -59,7 +59,59 @@ Go语言标准库中提供了net/http包用于实现HTTP客户端和服务端编
 
 Go语言中的`net/http`包提供了最简洁的HTTP客户端实现，我们无需借助第三方网络通信库就可以直接使用HTTP中的GET和POST请求。
 
+#### 基本方法
 
+```go
+func (c *Client) Get(url string)(r *Response,err error)
+func (c *Client) Post(url string,bodyType string,body io.Reader)(r *Response,err error)
+func (c *Client) PostForm(url string,data url.Values)(r *Response,err error)
+func (c *Client) Head(url string)(r *Response，err error)
+func (c *Client) Do(req *Request)(r *Response, err error)
+```
+
+Get方法
+
+```go
+func GetDemo() {
+	resp, err := http.Get("http://www.baidu.com")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+	_, _ = io.Copy(os.Stdout, resp.Body)
+}
+```
+
+
+
+
+
+Post方法
+
+```go
+func PostDemo(){
+	imgFile, err := ioutil.ReadFile("a,jpg")
+	if err != nil {
+		fmt.Println("ioutil.ReadFile(\"a,jpg\") failed ",err)
+		return
+	}
+	reader := bytes.NewReader(imgFile)
+	resp, err := http.Post("http://example.com/upload", "image/jpeg", reader)
+	if err != nil {
+		fmt.Println(" http.Post(...) error ",err)
+		return
+	}
+	if resp.StatusCode != http.StatusOK {
+		// 请求失败
+		fmt.Println("request error，Response code is ",resp.StatusCode)
+		return
+	}
+	// do something
+}
+```
 
 
 

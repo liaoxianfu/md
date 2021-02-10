@@ -1,4 +1,4 @@
-### 1、goroutine
+###  1、goroutine
 
 goroutine是Go语言中轻量级线程的实现，由Go运行时(runtime)管理。使用非常简单，只需要在调用方法前面加上go关键字即可。
 
@@ -11,6 +11,47 @@ go Add(1,2) // 调用
 ```
 
 在一个函数调用前面加上一个go关键字就会创建一个新的goroutine并发执行。函数返回时这个goroutine就自动结束了。值得注意的是，**如果这个函数有返回值时，这个返回值会被丢弃**。
+
+goroutine具有以下的特点：
+
+- go 的执行是非阻塞的，不会等待
+- go 后面函数的返回值会被丢弃
+- 调度器是无序调度的
+- 所有的goroutine的权重都是一样的
+- main函数会单独开辟一个goroutine 遇到其他go关键字会再创建goroutine
+- Go没有暴露goroutine id给用户，所以不能在一个go routine里显式操作另一个goroutine，不过可以使用runtime包提供的一些函数访问和设置goroutine的相关信息
+
+#### 常见API
+
+```go
+runtime.GOMAXPROCS(0) // 在新版go语言中无论填入什么数 都会返回cpu的核心数
+runtime.GoExit() // 结束当前goroutine运行
+runtime.Gosched() //放弃当前调度执行的机会
+```
+
+
+
+```go
+// runtime.GoExit() 
+func goHandler() {
+	defer func() {
+		fmt.Println("exit .....")
+	}()
+	fmt.Println("do something")
+	runtime.Goexit() // 结束当前运行 不会再往下执行 但是会调用defer 且不会产生panic
+	fmt.Println("next ...")
+}
+
+func GoExitDemo()  {
+	go goHandler()
+	time.Sleep(time.Second)
+}
+
+```
+
+
+
+
 
 ### 2、并发通信
 
@@ -108,14 +149,86 @@ var chanName chan Type
 定义一个chan可以直接使用make函数
 
 ```go
-ch:=make(chan int)
+ch1 := make(chan int) // 不带缓存
+ch2 := make(chan int,number int) // 带缓存
 ```
 
 这样就初始化并声明了一个int类型的名为ch的channel。在channel中最常用的是写入和读取操作。
 
-写入`ch<-value` 读取`value := <-ch`无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。
+写入`ch<-value` 读取`value := <-ch`无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于通信也可以用于两个goroutine通信。**有缓存的用于通信。
 
-select机制
+```go
+// 使用chan 进行goroutine之间的通信 模拟初始化耗时的操作 比顺序操作减少1s
+
+// 全局配置属性
+var baseUrl string
+
+// 用于判断是否
+var baseUrlChan chan bool
+
+// 用于判断初始化是否完成
+var initChan chan bool
+
+func initConfig() {
+	time.Sleep(time.Second) // 模拟读取配置文件耗时
+	baseUrl = "http://www.baidu.com"
+	baseUrlChan <- true
+}
+
+func Config() {
+	//做一些无需baseUrl的耗时
+	time.Sleep(time.Second)
+    // 阻塞等待initConfig()完成 加载上baseUrl
+	<-baseUrlChan
+	fmt.Println(baseUrl)
+	time.Sleep(time.Second)
+	initChan <- true
+}
+
+func AsyncChan() {
+	baseUrlChan = make(chan bool)
+	initChan=make(chan bool)
+	go initConfig()
+	go Config()
+	res := <-initChan
+	fmt.Println(res)
+}
+```
+
+
+
+```sh
+=== RUN   TestAsyncChan
+--- PASS: TestAsyncChan (2.00s)
+=== RUN   TestAsyncChan/test1
+http://www.baidu.com
+true
+    --- PASS: TestAsyncChan/test1 (2.00s)
+PASS
+```
+
+操作不同状态的chan会引发三种不同的行为
+
+**panic**
+
+- 向已经关闭的通道写入数据会引发panic 关闭后存在数据读取不会发生panic
+- 最佳实践是由写入方关闭能够最大程度上避免向已经关闭的通道写入数据引发panic
+- 重复关闭会导致panic
+
+**阻塞**
+
+- 向未初始化的通道写数据或者读数据会导致当前goroutine永久阻塞。
+- 向缓存区已满的channel写入也会导致阻塞
+- 通道没有数据会进行阻塞
+
+**非阻塞**
+
+- 读取以及关闭的通道不会引发阻塞，如果没有数据会返回对应类型的零值可以用`commma,ok:=<-ch`进行判断
+- 向缓冲没有满的通道进行写入不会引起阻塞
+
+
+
+#### 3.2 select机制
 
 ```go
 
@@ -169,22 +282,36 @@ i:=<-ch
 如果出现错误导致ch中一直没有数据写入也就是永远没有人向ch中写入数据，那么这个goroutine就会永远阻塞在这里。Go中并没有提供超时的处理机制，但是我们可以利用select机制实现。
 
 ```go
-timeout:= make(chan bool,1)
-go func(){
-    time.Sleep(time.Second) // 睡眠1s
-    timeout<-true // 发送超时信号
-}
-// 利用select
-select{
-    case <-ch:
-    	// 如果在1s中内读取到数据就执行操作
-    case <-timeout:
-    	// 超时 进行处理操作
-    
+func TimeOutChan() {
+	timeOutChan := make(chan bool)
+	resChan := make(chan int)
+	// 开启一个goroutine进行超时chan操作
+	go func() {
+		time.Sleep(time.Second * 2)
+		timeOutChan <- true
+	}()
+	select {
+	case <-resChan:
+		fmt.Println("读取数据")
+	case <-timeOutChan:
+		fmt.Println("超时了 进行操作")
+		
+	}
 }
 ```
 
-channel传递
+```go
+=== RUN   TestTimeOutChan
+--- PASS: TestTimeOutChan (2.00s)
+=== RUN   TestTimeOutChan/test1
+超时了 进行操作
+    --- PASS: TestTimeOutChan/test1 (2.00s)
+PASS
+```
+
+
+
+#### 3.3 channel传递
 
 需要注意的是channel本身就是也是一个原生类型与map之类的类型的地位是一样的，因此channel在定义之后也可以通过channel进行传递。
 
@@ -198,7 +325,7 @@ var ch3 chan<- int // 只支持写入的channel
 
 
 
-多核并行优化
+#### 3.4 多核并行优化
 
 在执行一些计算任务时，我们希望能够尽量的利用多核的特性尽量让任务并行化。
 
@@ -281,7 +408,7 @@ func main() {
 
 
 
-同步锁
+#### 3.5 同步锁
 
 虽然Go语言设计者使用了channel进行并发通信，但是也仍然保留了传统的同步锁机制。在Go语言的包中提供了两种锁类型，分别是`sync.Mutex`和`sync.RWMutex`Mutex是最简单的一种锁类型，同时也比较暴力，当一个goroutine获得了Mutex时其他的goroutine就必须乖乖的等这个goroutine释放这个Mutex。而RWMutex相对友好一些，是经典的读写模型，在读锁占用的情况下会阻止写锁，但是不会阻止读锁，也就是在读锁的情况下只允许读不允许写，但是在写锁的情况下都不允许，也就是即不允许读也不允许写.对于这两种锁的Lock()和RLock()都必须对应ULock()和URLock() 。
 
@@ -328,4 +455,59 @@ hello world
 ```
 
 如果没有引入once的那么就会调用两次setUp函数，使用once操作就会只调用了一次。
+
+### 4、WaitGroup
+
+前面提到的goroutine和chan 一个用于并发一个用于通信，没有缓存的channel可以具有同步功能，除此之外`sync`包提供了多个goroutine同步的机制，主要是通过WaitGroup实现的。主要数据结构和操作如下
+
+```go
+type WaitGroup struct {
+		noCopy noCopy
+		state1 [3]uint32
+}
+
+// 添加等待信号
+func (w *WaitGroup) Add(delta int)
+
+// 释放等待信号
+func (w *WaitGroup) Done()
+
+// 等待
+func (w *WaitGroup)Wait()
+```
+
+WaitGroup 用来等待多个goroutine完成。main 函数的goroutine 调用Add来设置goroutine数目，当一个goroutine结束之后调用Done() Wait用来等待所有的goroutine完成。
+
+
+
+```go
+// 创建WaitGroup
+var wg sync.WaitGroup
+
+func WaitGroupDemo(urls []string) {
+	for _, url := range urls {
+		// 添加一个需要等待的goroutine
+		wg.Add(1)
+		go func(url string) {
+			// 释放
+			defer wg.Done()
+			resp, err := http.Get(url)
+			if err != nil {
+				fmt.Printf("request %s error error info: %s\n", url, err.Error())
+				return
+			}
+			if resp.StatusCode==http.StatusOK{
+				fmt.Printf("%s request success!\n",url)
+			}else {
+				fmt.Printf("%s request error status code is %d\n",url,resp.StatusCode)
+			}
+		}(url)
+	}
+	// 等待所有的goroutine执行完毕
+	wg.Wait()
+}
+
+```
+
+
 
