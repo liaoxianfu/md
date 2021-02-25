@@ -1,7 +1,3 @@
-
-
-
-
 ### 虚拟机centos7.8  hadoop3.2.1 源码编译
 
 大家好！ 我将带大家编译Hadoop3.2.1，本次Linux环境为Centos7.8 在网上找到的大部分是基于centos6.x 和Hadoop2.7.x的版本 在最新的Hadoop3.x中有些是不适用的。
@@ -169,15 +165,15 @@ export PATH=$PATH:$JAVA_HOME/bin
 
 
 
-![image-20201112171641315](D:\MarkDown\BigData\img\image-20201112171641315.png)
+![image-20201112171641315](img/image-20201112171641315.png)
 
 
 
 安装maven
 
-![image-20201112172012777](D:\MarkDown\BigData\img\image-20201112172012777.png)
+![image-20201112172012777](img/image-20201112172012777.png)
 
-![image-20201112172137341](D:\MarkDown\BigData\img\image-20201112172137341.png)
+![image-20201112172137341](img/image-20201112172137341.png)
 
 更换阿里云源
 
@@ -185,11 +181,11 @@ vim /opt/module/maven/conf/settings.xml
 
 ```xml
  <mirror>
-                <id>nexus-aliyun</id>
-                <mirrorOf>central</mirrorOf>
-                <name>Nexus aliyun</name>
-                <url>http://maven.aliyun.com/nexus/content/groups/public</url>
-        </mirror>
+         <id>nexus-aliyun</id>
+         <mirrorOf>central</mirrorOf>
+         <name>Nexus aliyun</name>
+         <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+</mirror>
 ```
 
 将第一部分的带yum的都安装好
