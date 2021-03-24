@@ -149,17 +149,55 @@ var chanName chan Type
 定义一个chan可以直接使用make函数
 
 ```go
-ch1 := make(chan int) // 不带缓存
+ch1 := make(chan int) // 无缓存
 ch2 := make(chan int,number int) // 带缓存
+var ch chan int // 声明nil管道
 ```
 
-这样就初始化并声明了一个int类型的名为ch的channel。在channel中最常用的是写入和读取操作。
+这样就初始化并声明了一个int类型的名为ch1的无缓冲channel。和一个int类型的名为ch2的带缓冲的channel以及一个nil管道。
 
-写入`ch<-value` 读取`value := <-ch`无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于通信也可以用于两个goroutine通信。**有缓存的用于通信。
+在channel中最常用的是写入和读取操作。
+
+````go
+ch1<- 1
+v:=<-ch1 // 只获取值
+v,ok:=<-ch1 // 获取值和是否成功读取到数据的状态（bool）
+````
+
+当使用**无缓存管道**时，无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。
+
+对于有**缓冲的管道**，当管道缓冲区还没满时可以进行写入，此时不会进行阻塞。如果缓冲区满了就会进行阻塞直到有读取的操作将缓冲区变为非满的状态。如果缓冲区为空，此时进行读取操作则会进行阻塞。
+
+对于**nil**管道无论是读写都会进行阻塞，而且是永久阻塞。
+
+对于读取管道的**第二个变量值**，需要注意的是这个并不能代表管道是否关闭的状态，只能代表是否成功读取到了数据。确切来说只能代表和管道中是否还有数据有关。
+
+
+
+对于读写管道阻塞情况总结：
+
+**对于读管道**
+
+* 管道没有缓冲区
+* 管道缓冲区数据为空
+* nil管道
+
+**对于写管道**
+
+* 管道没有缓冲区
+* 管道缓存区已满
+* nil管道
+
+
+
+
+
+
+
+无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于通信也可以用于两个goroutine同步。**有缓存的用于通信。
 
 ```go
 // 使用chan 进行goroutine之间的通信 模拟初始化耗时的操作 比顺序操作减少1s
-
 // 全局配置属性
 var baseUrl string
 
@@ -227,6 +265,44 @@ PASS
 - 向缓冲没有满的通道进行写入不会引起阻塞
 
 
+
+#### 3.2 channel实现原理
+
+源码位置`src/runtime/chan.go`
+
+```go
+type hchan struct {
+	qcount   uint           // total data in the queue 队列中的元素个数
+	dataqsiz uint           // size of the circular queue 队列的大小
+	buf      unsafe.Pointer //  points to an array of dataqsiz elements
+	elemsize uint16 // 每个元素的大小
+	closed   uint32 // 管道是否关闭
+	elemtype *_type // element type
+	sendx    uint   // send index
+	recvx    uint   // receive index
+	recvq    waitq  // list of recv waiters
+	sendq    waitq  // list of send waiters
+
+	// lock protects all fields in hchan, as well as several
+	// fields in sudogs blocked on this channel.
+	//
+	// Do not change another G's status while holding this lock
+	// (in particular, do not ready a G), as this can deadlock
+	// with stack shrinking.
+	lock mutex // 互斥锁 不允许并发读写
+}
+
+```
+
+这是一个环形对列。
+
+![img](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/f1ae952fd1c62186d4bd0eb3fa1610db67a.jpg) 
+
+- dataqsiz指示了队列长度为6，即可缓存6个元素；
+- buf指向队列的内存，队列中还剩余两个元素；
+- qcount表示队列中还有两个元素；
+- sendx指示后续写入的数据存储的位置，取值[0, 6)；
+- recvx指示从该位置读取数据, 取值[0, 6)；
 
 
 
