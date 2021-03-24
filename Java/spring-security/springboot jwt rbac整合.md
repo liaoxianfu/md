@@ -8,7 +8,7 @@
 
 jwt请求流程
 
-![img](D:\MarkDown\Java\spring-security\img\jwt.jpg)
+9，
 
 1、首先用户使用用户名和密码进行登录
 

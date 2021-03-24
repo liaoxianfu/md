@@ -58,11 +58,11 @@ public class RxDemo01 extends Observable {
 
 map
 
-![image-20210119155609151](D:\MarkDown\Java\spring框架\WebFlux.assets\image-20210119155609151.png)
+![image-20210119155609151](WebFlux.assets\image-20210119155609151.png)
 
 flatMap
 
-![image-20210119154305364](D:\MarkDown\Java\spring框架\img\image-20210119154305364.png)
+![image-20210119154305364](img\image-20210119154305364.png)
 
 依赖文件
 

@@ -1,3 +1,5 @@
+
+
 ###  1、goroutine
 
 goroutine是Go语言中轻量级线程的实现，由Go运行时(runtime)管理。使用非常简单，只需要在调用方法前面加上go关键字即可。
@@ -10,7 +12,7 @@ func Add(x,y int){
 go Add(1,2) // 调用
 ```
 
-在一个函数调用前面加上一个go关键字就会创建一个新的goroutine并发执行。函数返回时这个goroutine就自动结束了。值得注意的是，**如果这个函数有返回值时，这个返回值会被丢弃**。
+在一个函数调用前面加上一个go关键字就会创建一个新的goroutine并发执行。函数返回时这个goroutine就自动结束了。值得注意的是，**如果这个函数有返回值时，这个返回值会被丢弃**。那个使用goroutine后如何获取要返回的值呢?使用channel，下面会讲到。
 
 goroutine具有以下的特点：
 
@@ -51,15 +53,13 @@ func GoExitDemo()  {
 
 
 
-
-
 ### 2、并发通信
 
 在工程上常见的并发通信模型有两种分别是：共享数据和消息。
 
 共享数据是指多个并发单元分贝保持对同一个数据的引用，实现对该数据的共享。被共享的数据可能有多种形式，比如内存数据块，磁盘文件、网络数据等。在实际工作中最常见的是内存。
 
-使用共享内存的方式进行并发通信
+使用共享内存的方式进行并发通信。（简单的可以理解定义一个非函数内的变量，多个并发的单元都可以进行修改）
 
 ```go
 package main
@@ -86,9 +86,9 @@ func main() {
 	}
 
 	for {
-		lock.Lock()
-		c := counter
-		lock.Unlock()
+		lock.Lock() // 加锁 counter不能被其他goroutine进行操作
+		c := counter //获取counter的值
+		lock.Unlock()//解锁 其他的goroutine可以进行操作
 		runtime.Gosched() // 让出时间片
 		if c >= 10 {
 			break
@@ -155,7 +155,7 @@ ch2 := make(chan int,number int) // 带缓存
 
 这样就初始化并声明了一个int类型的名为ch的channel。在channel中最常用的是写入和读取操作。
 
-写入`ch<-value` 读取`value := <-ch`无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于通信也可以用于两个goroutine通信。**有缓存的用于通信。
+写入`ch<-value` 读取`value := <-ch`无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于同步也可以用于两个goroutine通信。**有缓存的用于通信。
 
 ```go
 // 使用chan 进行goroutine之间的通信 模拟初始化耗时的操作 比顺序操作减少1s
@@ -271,7 +271,7 @@ for i:= range c{
 }
 ```
 
-超时机制
+**超时机制**
 
 在前面的介绍中完全没有考虑到出错的情况，但是这个问题显然是无法忽略的，在并发编程中最需要处理的就是超时问题，也就是向channel中写入数据时发现channel以满，或者读取的时候channel为空。使用channel是要非常小心，例如
 
@@ -295,7 +295,6 @@ func TimeOutChan() {
 		fmt.Println("读取数据")
 	case <-timeOutChan:
 		fmt.Println("超时了 进行操作")
-		
 	}
 }
 ```
