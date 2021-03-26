@@ -63,7 +63,7 @@ dubbo.reference.check=fale
 
 在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试。
 
-![cluster](D:\MarkDown\Java\dubbo\img\cluster.jpg)
+![cluster](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/cluster.jpg)
 
 各节点关系：
 
@@ -181,7 +181,7 @@ private UserService userService;
 
 在开发及测试环境下，经常需要绕过注册中心，只测试指定服务提供者，这时候可能需要点对点直连，点对点直连方式，将以服务接口为单位，忽略注册中心的提供者列表，A 接口配置点对点，不影响 B 接口从注册中心获取列表。
 
-![/user-guide/images/dubbo-directly.jpg](D:\MarkDown\Java\dubbo\img\dubbo-directly.jpg)
+![/user-guide/images/dubbo-directly.jpg](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/dubbo-directly.jpg)
 
 `2.0` 以上版本自动加载 ${user.home}/dubbo-resolve.properties文件，不需要配置 。==**注意** 为了避免复杂化线上环境，不要在线上使用这个功能，只应在测试阶段使用。==
 
@@ -364,5 +364,5 @@ public class UserServiceImpl implements UserService {
 
 通过令牌验证在注册中心控制权限，以决定要不要下发令牌给消费者，可以防止消费者绕过注册中心访问提供者，另外通过注册中心可灵活改变授权方式，而不需修改或升级提供者
 
-![/user-guide/images/dubbo-token.jpg](D:\MarkDown\Java\dubbo\img\dubbo-token.jpg)
+![/user-guide/images/dubbo-token.jpg](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/dubbo-token.jpg)
 

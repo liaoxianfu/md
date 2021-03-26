@@ -42,13 +42,9 @@ npm run build
 
 会产生target文件夹
 
-
-
-![2](D:\MarkDown\Java\dubbo\img\2.png)
-
 将里面的所有内容进行复制
 
-![image-20200810161242252](D:\MarkDown\Java\dubbo\img\image-20200810161242252.png)
+![image-20200810161242252](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200810161242252.png)
 
 
 
@@ -66,7 +62,7 @@ npm run build
 mvn package -Dmaven.test.skip=true
 ```
 
-![image-20200810161739852](D:\MarkDown\Java\dubbo\img\image-20200810161739852.png)
+![image-20200810161739852](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200810161739852.png)
 
 打包没有报错就证明打包完成
 
@@ -78,7 +74,7 @@ mvn package -Dmaven.test.skip=true
 
 运行jar报即可
 
-![image-20200810162249807](D:\MarkDown\Java\dubbo\img\image-20200810162249807.png)
+![image-20200810162249807](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/image-20200810162249807.png)
 
 ==默认的用户名密码是root==  可以在配置文件中进行修改
 

@@ -40,13 +40,13 @@ RDD是一个抽象类，需要子类具体实现
 
 RDD封装的计算逻辑是不可以进行改变的，想要改变只能重新生成新的RDD，在新的RDD中进行封装计算逻辑。
 
-![image-20201025125022665](D:\MarkDown\BigData\spark\img\image-20201025125022665.png)
+![image-20201025125022665](img/image-20201025125022665.png)
 
 
 
 可分区、并行计算
 
-![image-20201025125117209](D:\MarkDown\BigData\spark\img\image-20201025125117209.png)
+![image-20201025125117209](img/image-20201025125117209.png)
 
 
 
