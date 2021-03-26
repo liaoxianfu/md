@@ -156,9 +156,7 @@ var ch chan int // 声明nil管道
 
 这样就初始化并声明了一个int类型的名为ch1的无缓冲channel。和一个int类型的名为ch2的带缓冲的channel以及一个nil管道。
 
-<<<<<<< HEAD
 写入`ch<-value` 读取`value := <-ch`无论是读取还是写入都会导致程序阻塞，直到有其他的goroutine从这个channel中读取数据或者写入进去数据。无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于同步也可以用于两个goroutine通信。**有缓存的用于通信。
-=======
 在channel中最常用的是写入和读取操作。
 
 ````go
@@ -198,7 +196,7 @@ v,ok:=<-ch1 // 获取值和是否成功读取到数据的状态（bool）
 
 
 无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于通信也可以用于两个goroutine同步。**有缓存的用于通信。
->>>>>>> 66760c12c135cb86c919fa353dc1825866673319
+
 
 ```go
 // 使用chan 进行goroutine之间的通信 模拟初始化耗时的操作 比顺序操作减少1s
@@ -296,21 +294,16 @@ type hchan struct {
 	lock mutex // 互斥锁 不允许并发读写
 }
 
-<<<<<<< HEAD
 **超时机制**
 
 在前面的介绍中完全没有考虑到出错的情况，但是这个问题显然是无法忽略的，在并发编程中最需要处理的就是超时问题，也就是向channel中写入数据时发现channel以满，或者读取的时候channel为空。使用channel是要非常小心，例如
 
 ​```go
 i:=<-ch
-=======
->>>>>>> 66760c12c135cb86c919fa353dc1825866673319
-```
 
 这是一个环形对列。
 
-<<<<<<< HEAD
-```go
+​```go
 func TimeOutChan() {
 	timeOutChan := make(chan bool)
 	resChan := make(chan int)
