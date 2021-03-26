@@ -105,7 +105,7 @@ func BenchmarkAdd(b *testing.B) {
 
 
 
-测试执行 (使用 `--run=none` 避免运行普通的测试函数, 因为一般不可能有函数名匹配 `none`):
+测试执行 (使用 `-run=none` 避免运行普通的测试函数, 因为一般不可能有函数名匹配 `none`):
 
 ```sh
 go test -v  -bench="BenchmarkAdd$" -run=none  ./mymath
