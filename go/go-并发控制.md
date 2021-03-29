@@ -1,10 +1,10 @@
-### 并发控制
+## 并发控制
 
 对于在一些场景中需要在一个协程中等待另一个或者多个协程的信息，举例用户下单后，创建订单需要确保在通知商家确定有货，收取金额后再进行数据库订单写入的操作。此时就需要等待通知商家和收取金额两个go routine成功通知数据库写入。Go提供了三个方案分别是channel、WaitGroup和Context
 
 
 
-channel
+### 1. channel
 
 ```go
 package main
@@ -41,7 +41,7 @@ func main() {
 
 ```
 
-WaitGroup
+### 2. WaitGroup
 
 ```go
 package main
@@ -72,7 +72,7 @@ func main() {
 
 ```
 
-Context
+### 3. Context
 
 Context实际上只实现了接口，接口的定义
 
@@ -91,7 +91,7 @@ type Context interface {
 }
 ```
 
-emptyCtx 定义
+#### 3.1 emptyCtx 定义
 
 ```go
 type emptyCtx int
@@ -139,7 +139,10 @@ func Background() Context {
 
 context包中定义了一个公用的emptCtx全局变量，名为background 可以通过context.Background()方法进行获取。context包提供了四个方法创建不同类型的context，使用这四个方法时如果没有父context则需要传入background，将background作为父节点。
 
+四个方法的定义如下：
+
 ```go
+// 创建cancelCtx
 func WithCancel(parent Context) (ctx Context, cancel CancelFunc) {
 	if parent == nil {
 		panic("cannot create context from nil parent")
@@ -149,7 +152,7 @@ func WithCancel(parent Context) (ctx Context, cancel CancelFunc) {
 	return &c, func() { c.cancel(true, Canceled) }
 }
 
-
+// 创建timeCtx 实现设定一个具体的截止日期
 func WithDeadline(parent Context, d time.Time) (Context, CancelFunc) {
 	if parent == nil {
 		panic("cannot create context from nil parent")
@@ -178,11 +181,13 @@ func WithDeadline(parent Context, d time.Time) (Context, CancelFunc) {
 	return c, func() { c.cancel(true, Canceled) }
 }
 
+// 创建timeCtx 实现超时的效果
 func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc) {
 	return WithDeadline(parent, time.Now().Add(timeout))
 }
 
 
+// 创建valueCtx 实现在协程上传递数据的效果
 func WithValue(parent Context, key, val interface{}) Context {
 	if parent == nil {
 		panic("cannot create context from nil parent")
@@ -202,12 +207,11 @@ func WithValue(parent Context, key, val interface{}) Context {
 
 
 
-cancelCtx
+#### 3.2 cancelCtx
 
 ```go
 type cancelCtx struct {
 	Context
-
 	mu       sync.Mutex            // protects following fields
 	done     chan struct{}         // created lazily, closed by first cancel call
 	children map[canceler]struct{} // set to nil by the first cancel call
@@ -356,6 +360,8 @@ type timerCtx struct {
 }
 ```
 
+#### 3.3 timerCtx
+
 timerCtx在cancelCtx基础上添加了定时器的功能用于标识自动cancel的最终时间，而timeer就是自动触发的定时器。由此衍生出WithDeadline()和WithTiemout()，实际上实现的原理一致语境不同而已。
 
 * deadline 指定最后期限，比如2021：3：22 00:00:00 自动结束
@@ -437,6 +443,8 @@ func main() {
 ```
 
 
+
+#### 3.4 valueCtx 
 
 valueCtx比较简单 就是可以传递数据
 
@@ -524,4 +532,46 @@ func main() {
 ```
 
 注意 因为valueCtx是无法自动结束的 所以需要设置一个支持cancel的父context
+
+### 4.Mutex
+
+互斥锁是在并发编程中对共享资源进行访问的主要手段，对此Go语言提供了简单的Mutex，Mutex是一个结构体类型对外暴露Lock() 和Unlock() 两个方法，用于加锁和解锁。
+
+#### 4.1 Mutex构成
+
+Mutex的定义如下:
+
+```go
+// A Mutex is a mutual exclusion lock.
+// The zero value for a Mutex is an unlocked mutex.
+//
+// A Mutex must not be copied after first use.
+type Mutex struct {
+	state int32
+	sema  uint32
+}
+```
+
+根据官方的定义我们知道 Mutex是一个互斥锁 零值是一个unlock的互斥锁，当第一次使用后禁止进行拷贝操作。`state`用来表示互斥锁的状态，比如是否被锁定等。`sema`表示信号量，协程阻塞等待该信号量，解锁的协程释放信号量从而唤醒等待信号量。
+
+![img](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/20201218131518552.png)
+
+* Locked  代表是否被锁定 0 没有 1 锁定
+* Woken 表示是否有协程被唤醒，0 没有 1 已经唤醒正在加锁
+* Starving 该Mutex是否处于饥饿状态 0 没有 1 表示饥饿状态 有协程阻塞超过了1ms
+* Waiter 表示阻塞等待的协程个数 协程解锁时根据这个值来判断是否需要释放信号量
+
+协程之间的抢锁实际上是争夺给Locked赋值的权利，能给Locked域赋值1，就说明抢锁成功。如果没有抢到就阻塞等待`sema`信号量，等待再次解锁进行下次的争夺。
+
+#### 4.2 加锁和解锁过程
+
+![在这里插入图片描述](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/20201218131710736.png)
+
+
+
+
+
+
+
+
 
