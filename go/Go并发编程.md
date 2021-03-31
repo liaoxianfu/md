@@ -1,4 +1,6 @@
+### Go并发编程
 
+[toc]
 
 ###  1、goroutine
 
@@ -84,7 +86,6 @@ func main() {
 	for i := 0; i < 10; i++ {
 		go Count(lock) // 并发执行
 	}
-
 	for {
 		lock.Lock() // 加锁 counter不能被其他goroutine进行操作
 		c := counter //获取counter的值
@@ -189,12 +190,6 @@ v,ok:=<-ch1 // 获取值和是否成功读取到数据的状态（bool）
 * 管道缓存区已满
 * nil管道
 
-
-
-
-
-
-
 无缓存的channel的len和cap都是0，有缓存的len代表还没有读取的元素数,cap代表整个通道的容量**。无缓存的通道既可以用于通信也可以用于两个goroutine同步。**有缓存的用于通信。
 
 
@@ -293,17 +288,17 @@ type hchan struct {
 	// with stack shrinking.
 	lock mutex // 互斥锁 不允许并发读写
 }
-
+```
 **超时机制**
 
 在前面的介绍中完全没有考虑到出错的情况，但是这个问题显然是无法忽略的，在并发编程中最需要处理的就是超时问题，也就是向channel中写入数据时发现channel以满，或者读取的时候channel为空。使用channel是要非常小心，例如
 
-​```go
+```go
 i:=<-ch
-
+```
 这是一个环形对列。
 
-​```go
+```go
 func TimeOutChan() {
 	timeOutChan := make(chan bool)
 	resChan := make(chan int)
@@ -312,7 +307,7 @@ func TimeOutChan() {
 		time.Sleep(time.Second * 2)
 		timeOutChan <- true
 	}()
-	select {
+select {
 	case <-resChan:
 		fmt.Println("读取数据")
 	case <-timeOutChan:
@@ -320,8 +315,9 @@ func TimeOutChan() {
 	}
 }
 ```
-=======
+
 ![img](https://cdn.jsdelivr.net/gh/liaoxianfu/blogimg/data/f1ae952fd1c62186d4bd0eb3fa1610db67a.jpg)
+
 - dataqsiz指示了队列长度为6，即可缓存6个元素；
 - buf指向队列的内存，队列中还剩余两个元素；
 - qcount表示队列中还有两个元素；
@@ -430,6 +426,8 @@ func main() {
 #### 3.5 同步锁
 
 虽然Go语言设计者使用了channel进行并发通信，但是也仍然保留了传统的同步锁机制。在Go语言的包中提供了两种锁类型，分别是`sync.Mutex`和`sync.RWMutex`Mutex是最简单的一种锁类型，同时也比较暴力，当一个goroutine获得了Mutex时其他的goroutine就必须乖乖的等这个goroutine释放这个Mutex。而RWMutex相对友好一些，是经典的读写模型，在读锁占用的情况下会阻止写锁，但是不会阻止读锁，也就是在读锁的情况下只允许读不允许写，但是在写锁的情况下都不允许，也就是即不允许读也不允许写.对于这两种锁的Lock()和RLock()都必须对应ULock()和URLock() 。
+
+
 
 全局唯一性操作
 
