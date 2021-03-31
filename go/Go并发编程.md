@@ -263,6 +263,32 @@ PASS
 
 
 
+**超时机制**
+
+在前面的介绍中完全没有考虑到出错的情况，但是这个问题显然是无法忽略的，在并发编程中最需要处理的就是超时问题，也就是向channel中写入数据时发现channel以满，或者读取的时候channel为空。使用channel是要非常小心，例如
+
+```go
+i:=<-ch
+```
+
+```go
+func TimeOutChan() {
+	timeOutChan := make(chan bool)
+	resChan := make(chan int)
+	// 开启一个goroutine进行超时chan操作
+	go func() {
+		time.Sleep(time.Second * 2)
+		timeOutChan <- true
+	}()
+select {
+	case <-resChan:
+		fmt.Println("读取数据")
+	case <-timeOutChan:
+		fmt.Println("超时了 进行操作")
+	}
+}
+```
+
 #### 3.2 channel实现原理
 
 源码位置`src/runtime/chan.go`
@@ -287,32 +313,6 @@ type hchan struct {
 	// (in particular, do not ready a G), as this can deadlock
 	// with stack shrinking.
 	lock mutex // 互斥锁 不允许并发读写
-}
-```
-**超时机制**
-
-在前面的介绍中完全没有考虑到出错的情况，但是这个问题显然是无法忽略的，在并发编程中最需要处理的就是超时问题，也就是向channel中写入数据时发现channel以满，或者读取的时候channel为空。使用channel是要非常小心，例如
-
-```go
-i:=<-ch
-```
-这是一个环形对列。
-
-```go
-func TimeOutChan() {
-	timeOutChan := make(chan bool)
-	resChan := make(chan int)
-	// 开启一个goroutine进行超时chan操作
-	go func() {
-		time.Sleep(time.Second * 2)
-		timeOutChan <- true
-	}()
-select {
-	case <-resChan:
-		fmt.Println("读取数据")
-	case <-timeOutChan:
-		fmt.Println("超时了 进行操作")
-	}
 }
 ```
 
